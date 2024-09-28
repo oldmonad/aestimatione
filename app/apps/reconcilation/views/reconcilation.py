@@ -13,8 +13,6 @@ class FileUploadView(APIView):
       if serializer.is_valid():
         format = request.data.get("format").lower()
 
-        # reconconciled_data = reconconcile_files(serializer.validated_data)
-
         if format == "csv":
           response = HttpResponse(convert_to_csv(serializer.validated_data), content_type='text/csv')
           response['Content-Disposition'] = 'attachment; filename="reconciliation.csv"'
