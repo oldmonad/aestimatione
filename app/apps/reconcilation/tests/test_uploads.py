@@ -239,3 +239,231 @@ class TestUpload(APITestCase):
 
     self.assertEqual(response.status_code, 200)
     self.assertEqual(response.content, response_with_discrepanies_and_missing_data_in_html_format())
+
+  def test_cannot_process_files_with_empty_name_column_for_source_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['name value empty in source file for row with ID 1'])
+
+  def test_cannot_process_files_with_empty_id_column_for_source_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['ID value empty in source file for row in position 1'])
+
+  def test_cannot_process_files_with_empty_date_column_for_source_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,,100.5\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['date value empty in source file for row with ID 1'])
+
+  def test_cannot_process_files_with_empty_amount_column_for_source_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['amount value empty in source file for row with ID 1'])
+
+  def test_cannot_process_files_with_float_number_id_type_column_for_source_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1.5,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['invalid ID type for row in position 1 in source file'])
+
+  def test_cannot_process_files_with_invalid_id_type_column_for_source_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\nFig,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['invalid ID type for row in position 1 in source file'])
+
+  def test_cannot_process_files_with_empty_name_column_for_target_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['name value empty in target file for row with ID 1'])
+
+  def test_cannot_process_files_with_empty_id_column_for_target_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['ID value empty in target file for row in position 1'])
+
+  def test_cannot_process_files_with_empty_date_column_for_target_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['date value empty in target file for row with ID 1'])
+
+  def test_cannot_process_files_with_empty_amount_column_for_target_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['amount value empty in target file for row with ID 1'])
+
+  def test_cannot_process_files_with_float_number_id_type_column_for_target_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\n1.5,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['invalid ID type for row in position 1 in target file'])
+
+  def test_cannot_process_files_with_invalid_id_type_column_for_target_file(self):
+    """
+    Should not be able to process files with empty name columns for source file
+    """
+    source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
+    target_file_data = b"ID,Name,Date,Amount\nFig,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
+
+    source_file = SimpleUploadedFile("source.csv", source_file_data, content_type="text/csv")
+    target_file = SimpleUploadedFile("target.csv", target_file_data, content_type="text/csv")
+
+    response = self.client.post(self.upload_url, {
+        'source': source_file,
+        'target': target_file,
+        'format': 'html'
+    }, format='multipart')
+
+    self.assertEqual(response.status_code, 422)
+    self.assertEqual(response.json()["error"], ['invalid ID type for row in position 1 in target file'])
