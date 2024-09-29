@@ -242,7 +242,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_name_column_for_source_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty name column for source file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -261,7 +261,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_id_column_for_source_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty id column for source file
     """
     source_file_data = b"ID,Name,Date,Amount\n,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -280,7 +280,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_date_column_for_source_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty date column for source file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,,100.5\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -299,7 +299,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_amount_column_for_source_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty amount column for source file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -318,7 +318,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_float_number_id_type_column_for_source_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with float number type in id column for source file
     """
     source_file_data = b"ID,Name,Date,Amount\n1.5,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -337,7 +337,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_invalid_id_type_column_for_source_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with invalid id type in id column for source file
     """
     source_file_data = b"ID,Name,Date,Amount\nFig,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -356,7 +356,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_name_column_for_target_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty name column for target file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -375,7 +375,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_id_column_for_target_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty id column for target file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -394,7 +394,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_date_column_for_target_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty date column for target file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100.5\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,,100\n3,David Doe,2023-02-03,300.5"
@@ -413,7 +413,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_empty_amount_column_for_target_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with empty amount column for target file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,\n3,David Doe,2023-02-03,300.5"
@@ -432,7 +432,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_float_number_id_type_column_for_target_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with float number type id column for target file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\n1.5,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"
@@ -451,7 +451,7 @@ class TestUpload(APITestCase):
 
   def test_cannot_process_files_with_invalid_id_type_column_for_target_file(self):
     """
-    Should not be able to process files with empty name columns for source file
+    Should not be able to process files with invalid id type for target file
     """
     source_file_data = b"ID,Name,Date,Amount\n1,John Doe,2023-01-01,100\n2,Jane Doe,2023-01-03,200.5"
     target_file_data = b"ID,Name,Date,Amount\nFig,John Doe,2023-01-01,100\n3,David Doe,2023-02-03,300.5"

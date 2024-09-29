@@ -60,6 +60,79 @@ class FileSerializers(serializers.Serializer):
   def is_empty(self, value):
     return value.strip() == ""
 
+  def is_valid_string(self, value):
+    return isinstance(value, str)
+
+  def is_non_float_number(self, value):
+      return isinstance(value, int)
+
+  def validate_row(self, index, row, file_type):
+    if pd.isna(row["ID"]):
+      raise serializers.ValidationError({"error": f"ID value empty in {file_type} file for row in position {index + 1}"})
+    else:
+      id = row["ID"]
+
+    if pd.isna(row["Name"]):
+      raise serializers.ValidationError({"error": f"name value empty in {file_type} file for row with ID {row["ID"]}"})
+
+    if pd.isna(row["Date"]):
+      raise serializers.ValidationError({"error": f"date value empty in {file_type} file for row with ID {row["ID"]}"})
+    else:
+      source_date = str(row["Date"]).strip()
+
+    if pd.isna(row["Amount"]):
+      raise serializers.ValidationError({"error": f"amount value empty in {file_type} file for row with ID {row["ID"]}"})
+    else:
+      source_amount = row["Amount"]
+
+    if not self.is_valid_number(id):
+      raise serializers.ValidationError({"error": f"invalid ID type for row in position {index + 1} in {file_type} file"})
+
+    if not self.is_non_float_number(id):
+      raise serializers.ValidationError({"error": f"invalid ID type for row in position {index + 1} in {file_type} file"})
+
+    if not self.is_valid_string(source_date) or not self.is_valid_date(source_date):
+      raise serializers.ValidationError({"error": f"invalid date input in {file_type} file {source_date} from row with ID {row["ID"]}"})
+
+    if not self.is_valid_number(source_amount):
+      raise serializers.ValidationError({"error": f"invalid amount input in {file_type} file {source_amount} from row with ID {row["ID"]}"})
+
+    return {
+      "id": id,
+      "source_name": str(row["Name"]).strip().lower(),
+      "source_date": source_date,
+      "source_amount": source_amount,
+    }
+
+  def validate_matching_record(self, index, matching_record):
+    id = matching_record["ID"].iloc[0]
+
+    if pd.isna(matching_record["Name"].iloc[0]):
+      raise serializers.ValidationError({"error": f"name value empty in target file for row with ID {id}"})
+
+    if pd.isna(matching_record["Date"].iloc[0]):
+      raise serializers.ValidationError({"error": f"date value empty in target file for row with ID {id}"})
+    else:
+      source_date = str(matching_record["Date"].iloc[0]).strip()
+
+    if pd.isna(matching_record["Amount"].iloc[0]):
+      raise serializers.ValidationError({"error": f"amount value empty in target file for row with ID {id}"})
+    else:
+      source_amount = matching_record["Amount"].iloc[0]
+
+    if not self.is_valid_string(source_date) or not self.is_valid_date(source_date):
+      raise serializers.ValidationError({"error": f"invalid date input in target file {source_date} from row with ID {id}"})
+
+    if not self.is_valid_number(source_amount):
+      raise serializers.ValidationError({"error": f"invalid amount input in target file {source_amount} from row with ID {id}"})
+
+    return {
+      "id": id,
+      "source_name": str(matching_record["Name"].iloc[0]).strip().lower(),
+      "source_date": source_date,
+      "source_amount": source_amount,
+    }
+
   def validate(self, data):
     source = data.get('source')
     target = data.get('target')
@@ -73,8 +146,9 @@ class FileSerializers(serializers.Serializer):
     }
 
     for index, row in source_df.iterrows():
-      matching_records = target_df.loc[target_df["ID"] == row["ID"]]
-      if matching_records["ID"].empty:
+      validated_source_row = self.validate_row(index, row, 'source')
+      matching_record = target_df.loc[target_df["ID"] == validated_source_row["id"]]
+      if matching_record["ID"].empty:
         missing_record = {
           "record_id": row["ID"],
           "data": {
@@ -85,25 +159,16 @@ class FileSerializers(serializers.Serializer):
         }
         return_data["missing_in_target"].append(missing_record)
       else:
-        source_name = str(row["Name"]).strip().lower()
-        source_date = row["Date"]
-        source_amount = row["Amount"]
-        t_name = matching_records["Name"].iloc[0]
-        target_name = str(t_name).strip().lower()
-        target_date = (matching_records["Date"].iloc[0])
-        target_amount = matching_records["Amount"].iloc[0]
+        validated_target_row = self.validate_matching_record(index, matching_record)
 
-        if not self.is_valid_date(source_date):
-          raise serializers.ValidationError({"error": f"invalid date input in source file {source_date} from row with ID {row["ID"]}"})
+        source_name = validated_source_row["source_name"]
+        source_date = validated_source_row["source_date"]
+        source_amount = validated_source_row["source_amount"]
 
-        if not self.is_valid_date(target_date):
-          raise serializers.ValidationError({"error": f"invalid date input in target file {target_date} from row with ID {matching_records["ID"].iloc[0]}"})
-
-        if not self.is_valid_number(source_amount):
-          raise serializers.ValidationError({"error": f"invalid amount input in source file {source_amount} from row with ID {row["ID"]}"})
-
-        if not self.is_valid_number(target_amount):
-          raise serializers.ValidationError({"error": f"invalid amount input in target file {target_amount} from row with ID {matching_records["ID"].iloc[0]}"})
+        t_name = matching_record["Name"].iloc[0]
+        target_name = validated_target_row["source_name"]
+        target_date = validated_target_row["source_date"]
+        target_amount = validated_target_row["source_amount"]
 
         if source_name != target_name or source_date != target_date or source_amount != target_amount:
           record_discrepancy = {
@@ -114,7 +179,7 @@ class FileSerializers(serializers.Serializer):
               "Amount": source_amount
             },
             "target_data": {
-              "Name": t_name,
+              "Name": matching_record["Name"].iloc[0],
               "Date": target_date,
               "Amount": target_amount
             },
@@ -142,8 +207,9 @@ class FileSerializers(serializers.Serializer):
           return_data["record_discrepancies"].append(record_discrepancy)
 
     for index, row in target_df.iterrows():
-      matching_records = source_df.loc[source_df["ID"] == row["ID"]]
-      if matching_records["ID"].empty:
+      validated_source_row = self.validate_row(index, row, 'target')
+      matching_record = source_df.loc[source_df["ID"] == validated_source_row["id"]]
+      if matching_record["ID"].empty:
         missing_record = {
           "record_id": row["ID"],
           "data": {
